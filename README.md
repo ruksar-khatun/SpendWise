@@ -1,82 +1,114 @@
-# SpendWise 💳🌱
-> *"Understand your money. Control your spending."*
+# 🌿 SpendWise
 
-SpendWise is a modern personal finance management dashboard engineered with a clean, high-density FinTech aesthetic. It empowers users to track income and expenses, plan category budgets, analyze spending trends with interactive charts, monitor savings goals with milestone celebrations, and evaluate overall financial health through a dynamic 100-point scoring algorithm.
+> **"Understand your money. Control your spending."**
 
----
-
-## 🌟 Key Features
-
-### 1. 📊 Overview Dashboard
-- **Financial Summary Cards**: Four primary KPI cards (*Total Balance*, *Monthly Income*, *Monthly Expenses*, and *Savings*) with month-over-month deltas, circular badges, and quick-action menus.
-- **Interactive Spending Overview**: Responsive Recharts area chart with smooth monotone curves, teal gradient fills, custom INR tooltips, metric toggles (*Income* | *Expense* | *Savings*), and multi-range selectors (*This Month* weekly view, *3 Months*, *6 Months*, *This Year*).
-- **Dedicated "This Month" Weekly Breakdown**: Isolates the active billing cycle into weekly milestones (`W1 (1–7)`, `W2 (8–14)`, `W3 (15–21)`, `W4 (22–30)`) calculated from real-time transactions.
-- **Spending by Category Donut**: Dynamic donut chart with center total spend indicator, responsive layout containment, and automatic breakdown legend.
-- **Dynamic Financial Health Score**: Proprietary 100-point algorithm evaluating budget adherence (30 pts), savings rate (30 pts), expense consistency (20 pts), and goal progress (20 pts), featuring an interactive SVG ring gauge and actionable checklist rules.
-- **Recent Transactions Ledger**: Visual ledger with merchant icons, semantic income/expense coloring, and quick link to the full ledger.
-- **Budget Status**: Visual progress bar for overall monthly budget utilization alongside category breakdown meters.
-- **Smart Insights**: Contextual observations based on actual user financial data.
-- **Savings Goals**: Milestone tracking with progress bars, deposit shortcuts, and motivational banners.
-
-### 2. 💳 Full Transactions Management
-- Complete CRUD capabilities: Add, Edit, and Delete transactions with instant dashboard recalculations.
-- Segmented type filters (*All*, *Income*, *Expense*), category filters, live keyword search, and multi-criteria sorting (newest, oldest, highest/lowest amount).
-- Interactive modals with strict form validation and delete confirmation safeguards.
-
-### 3. 🎯 Monthly Budgets
-- Overall budget hero card comparing current burn against total limits.
-- Category budget cards (*Food*, *Shopping*, *Transport*, *Bills*, *Entertainment*, *Health*, *Other*) with visual warning thresholds (80% approaching limit, 100%+ exceeded).
-- "+ Set Budget" modal for instant monthly limit adjustments.
-
-### 4. 📈 Financial Analytics
-- Monthly Income vs Expenses bar chart with period comparisons.
-- Weekly cashflow trajectory (*W1* through *W4*) for the active month.
-- Key financial ratios: Daily spending average, highest single expense highlight, and 45%+ savings rate KPI.
-- Ranked top spending categories and automated *"Key Takeaways"*.
-
-### 5. 🏆 Savings Goals & Milestones
-- Dedicated goal portfolio with customizable target dates, icons, and categories.
-- Quick deposit modal with preset buttons (+₹500, +₹1,000, +₹5,000, +₹10,000).
-- Celebratory confetti animation and *"Goal Completed"* badge upon reaching 100% target funding.
-
-### 6. ⚙️ Settings, Dark Mode & Data Control
-- User profile personalization (*Name*, *Email*, *Avatar*).
-- Multi-currency support (₹ INR, $ USD, € EUR, £ GBP).
-- High-contrast **Dark Mode** toggle persisted across sessions.
-- Notification toggles for budget alerts, payment reminders, and weekly summaries.
-- Data export to JSON file, demo data reset, and local storage wipe.
+SpendWise is a modern, high-precision personal finance management dashboard built with React, TypeScript, Vite, and Tailwind CSS. Designed with a clean, pastel fintech aesthetic inspired by next-generation wealth management applications, SpendWise empowers users to track income and expenses, manage budgets, analyze spending velocity, monitor savings goals, and understand their overall financial health.
 
 ---
 
-## 🎨 Design System & Color Palette
+## ✨ Features
 
-SpendWise follows a disciplined, soft pastel FinTech visual language:
-
-| Token | Light Mode | Dark Mode | Usage |
-| :--- | :--- | :--- | :--- |
-| **Canvas** | `#f4f7f6` | `#0b1120` | App background |
-| **Cards** | `#ffffff` | `#141d2e` | Content cards & panels |
-| **Brand Primary** | `#0d9488` / `#14b8a6` | `#2dd4bf` | Brand teal, active tabs, buttons |
-| **Income / Success** | `#10b981` | `#34d399` | Income badges, positive trends |
-| **Expense / Danger** | `#f43f5e` | `#fb7185` | Expense amounts, budget alerts |
-| **Accents** | `#38bdf8`, `#6366f1`, `#f59e0b`, `#a855f7` | Category badges, charts |
+### 📊 1. Overview Dashboard
+- **Greeting & Motivational Header**: Dynamic time-of-day greeting (*"Good morning/afternoon/evening, Ruks"*), current cycle subtitle, and ambient quote card (*"A better you starts with smarter choices."*).
+- **4 Key Financial KPI Cards**:
+  - **Total Balance**: ₹42,580 (`▲ 8.4% from last month`)
+  - **Monthly Income**: ₹50,000 (`▲ 5.2% from last month`)
+  - **Monthly Expenses**: ₹27,420 (`▼ 3.1% from last month`)
+  - **Savings**: ₹22,580 (`▲ 12.6% from last month`)
+- **Interactive Spending Overview Area Chart**:
+  - Segmented toggle controls for **Income**, **Expense**, and **Savings**.
+  - Flexible timeframe filtering: **This Month** (weekly W1–W4 trajectory), **3 Months**, **6 Months**, and **This Year**.
+  - Custom branded tooltip with INR formatting and delta comparisons.
+- **Spending by Category Donut Chart**:
+  - Responsive Recharts donut visualization with center label (`₹27,420 Total Spent`).
+  - Color-coded categories: Food, Shopping, Transport, Bills, Entertainment, Health, Other.
+  - Formatted legend with live percentage share and text truncation containment.
+- **Dynamic Financial Health Score Meter**:
+  - Circular SVG progress gauge displaying `82 / 100` (*"Good"* tier).
+  - Dynamic scoring algorithm:
+    - Budget Adherence (30 pts)
+    - Savings Rate (30 pts)
+    - Expense Consistency (20 pts)
+    - Savings Goal Milestones (20 pts)
+  - Dynamic checklist rules evaluating budget limits, savings consistency, and category overspending.
+- **Recent Transactions Widget**:
+  - Clean mini-table showcasing merchant icons (Swiggy, Uber, Amazon, Electricity Bill, Salary) with semantic positive and negative color coding.
+- **Budget Status Tracker**:
+  - Overall monthly budget utilization (`₹27,420 / ₹35,000` — `78% used`).
+  - Category budget progress bars with visual warning thresholds.
+- **Smart Insights Engine**:
+  - Real-time data-driven insights highlighting month-over-month increases, budget percentages, transport savings, and goal pace.
+- **Savings Goals & Future Self Banner**:
+  - Milestone cards for MacBook (`72%`), Emergency Fund (`70%`), and Travel (`62%`).
+  - Motivational *"Invest in your future self — Discipline today, freedom tomorrow"* promo card.
 
 ---
 
-## 🚀 Tech Stack
+### 💳 2. Transactions Management
+- **Full-featured Data Table**: View, search, and manage all logged cashflow items.
+- **Multi-dimensional Filtering**:
+  - Live search across descriptions, notes, and merchants.
+  - Type toggle: **All**, **Income**, **Expense**.
+  - Category dropdown filter.
+  - Sorting by Newest, Oldest, Highest Amount, or Lowest Amount.
+- **Add & Edit Modal**:
+  - Form validation: positive amounts, description, category selection, and transaction date.
+  - Instant dashboard recalculation on submission.
+- **Delete Confirmation Dialog**:
+  - Safeguard modal verifying intent before permanently removing records.
 
-- **Framework**: [React 19](https://react.dev/)
-- **Build Tool**: [Vite 8](https://vitejs.dev/)
-- **Language**: [TypeScript](https://www.typescriptlang.org/)
-- **Styling**: [Tailwind CSS 3.4](https://tailwindcss.com/)
-- **Charts**: [Recharts 3](https://recharts.org/)
+---
+
+### 🎯 3. Monthly Budgets
+- **Dedicated Planner**: Set category thresholds and monitor actual consumption against allocated limits.
+- **Overspend Alerts**: Color transitions from brand teal to amber (approaching limit) to rose (over budget).
+- **Edit Budget Modal**: Quickly adjust monthly ceilings for any category.
+
+---
+
+### 📈 4. Financial Analytics & Deep Dive
+- **Income vs Expenses Bar Chart**:
+  - Multi-period analysis: **This Month** (weekly cashflow breakdown), **Last 3 Months**, **Last 6 Months**, and **This Year** (quarterly comparisons).
+- **Performance Metrics**:
+  - Average daily spending rate.
+  - Highest single expense detection.
+  - Live savings rate percentage benchmarked against the 20%+ target.
+- **Top Spending Categories**: Ranked bar breakdown of expenditure drivers.
+- **Key Takeaways**: Dynamic takeaways summarizing cashflow health, margin stability, and goal pace.
+
+---
+
+### 🚀 5. Savings Goals
+- Track progress toward high-impact financial milestones.
+- **Deposit Funds Modal**: Add contributions with quick presets (`+₹500`, `+₹1,000`, `+₹5,000`, `+₹10,000`).
+- **Milestone Celebration**: Triggers celebratory confetti and unlocks the *"Goal completed"* badge upon reaching 100%.
+
+---
+
+### ⚙️ 6. Settings, Dark Mode & Local Persistence
+- **Profile Customization**: Update name, email, and user avatar.
+- **Currency Switcher**: Seamlessly switch between `₹ INR`, `$ USD`, `€ EUR`, and `£ GBP`.
+- **Complete Dark Mode**: Handcrafted slate palette (`#0b1120`, `#141d2e`) with high-contrast text, borders, and readable charts.
+- **Local Storage Reliability**: All transactions, budgets, goals, and user settings persist across browser sessions with zero server dependency.
+- **Data Management**:
+  - Export complete data backup in formatted JSON format.
+  - Reset to initial demo reference state anytime.
+  - Clear all local data with a confirmation modal.
+
+---
+
+## 🛠️ Tech Stack
+
+- **Framework**: [React 18](https://react.dev/) with [TypeScript](https://www.typescriptlang.org/)
+- **Bundler & Dev Server**: [Vite](https://vitejs.dev/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/) with custom fintech design tokens
+- **Data Visualization**: [Recharts](https://recharts.org/) (Responsive Area, Bar, and Donut charts)
 - **Icons**: [Lucide React](https://lucide.dev/)
-- **Effects**: [Canvas Confetti](https://www.npmjs.com/package/canvas-confetti)
-- **Typography**: [Plus Jakarta Sans](https://fonts.google.com/specimen/Plus+Jakarta+Sans)
+- **Animation & Effects**: [Canvas Confetti](https://www.npmjs.com/package/canvas-confetti)
 
 ---
 
-## 📦 Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
 - Node.js (v18 or higher recommended)
@@ -99,60 +131,57 @@ SpendWise follows a disciplined, soft pastel FinTech visual language:
    ```bash
    npm run dev
    ```
-   Open [http://localhost:5173](http://localhost:5173) in your browser to experience the dashboard.
+   Open your browser and navigate to `http://localhost:5173/`.
 
 4. **Build for production**:
    ```bash
    npm run build
    ```
 
+5. **Preview production build**:
+   ```bash
+   npm run preview
+   ```
+
 ---
 
-## 📁 Project Structure
+## 📁 Project Architecture
 
-```text
+```
 SpendWise/
-├── public/
-│   └── favicon.svg
+├── public/                 # Static assets & favicon
 ├── src/
 │   ├── components/
-│   │   ├── analytics/          # Financial Analytics page & deep-dive charts
-│   │   ├── budgets/            # Budgets page & category limit meters
-│   │   ├── common/             # Toast notification container, alerts
-│   │   ├── help/               # Help & Support FAQ accordion
-│   │   ├── layout/             # Sidebar, Header, MobileNav
-│   │   ├── modals/             # Transaction, Budget, Goal, Deposit, Confirm modals
-│   │   ├── overview/           # Overview KPI cards, Area chart, Donut, Health gauge
-│   │   ├── profile/            # Profile summary card & tier status
-│   │   ├── savings/            # Savings Goals portfolio & celebration
-│   │   └── settings/           # Profile settings, dark mode, data export
+│   │   ├── analytics/      # AnalyticsPage & cashflow charts
+│   │   ├── budgets/        # BudgetsPage & category budget cards
+│   │   ├── common/         # Toast notifications & UI helpers
+│   │   ├── help/           # Help & FAQ page
+│   │   ├── layout/         # Header, Sidebar & Mobile Navigation
+│   │   ├── modals/         # Transaction, Budget, Goal, and Delete modals
+│   │   ├── overview/       # OverviewPage, StatCards, Charts & Widgets
+│   │   ├── profile/        # User Profile view
+│   │   ├── savings/        # SavingsGoalsPage & goal progress cards
+│   │   └── settings/       # SettingsPage, preferences & data management
 │   ├── context/
-│   │   └── FinanceContext.tsx  # Central React context & state management
+│   │   └── FinanceContext.tsx # Central reactive state & CRUD handlers
 │   ├── types/
-│   │   └── index.ts            # TypeScript interfaces & data models
+│   │   └── index.ts        # TypeScript data models & schemas
 │   ├── utils/
-│   │   ├── calculations.ts     # Health score algorithm, INR formatting, weekly filters
-│   │   ├── constants.ts        # Category colors & design tokens
-│   │   ├── seedData.ts         # Initial reference dataset
-│   │   └── storage.ts          # Safe LocalStorage persistence utilities
-│   ├── App.tsx                 # Main application shell & modal wiring
-│   ├── index.css               # Tailwind directives & custom card styles
-│   └── main.tsx                # React root entrypoint
-├── index.html
-├── package.json
-├── tailwind.config.js
-├── tsconfig.json
-└── vite.config.ts
+│   │   ├── calculations.ts # Financial formulas, scoring & trend aggregation
+│   │   ├── constants.ts    # Palette tokens & category definitions
+│   │   ├── seedData.ts     # Reference seed data
+│   │   └── storage.ts      # LocalStorage persistence wrapper
+│   ├── App.tsx             # Root router & layout orchestrator
+│   ├── index.css           # Tailwind base styles & fintech card design tokens
+│   └── main.tsx            # Application entry point
+├── package.json            # Dependencies and scripts
+├── tailwind.config.js      # Custom theme, font & color extensions
+├── tsconfig.json           # TypeScript configuration
+└── vite.config.ts          # Vite configuration
 ```
 
 ---
 
-## 🔒 Privacy & Persistence
+## 📄 License
 
-SpendWise operates with **privacy-first architecture**. 100% of your financial data, custom budgets, transactions, and preferences remain local in your browser via `localStorage`. No external servers or cloud accounts are required to use the application. You can export a complete JSON snapshot of your data at any time from the Settings tab.
-
----
-
-## 👤 Author
-
-Developed with care by **[Ruksar Khatun](https://github.com/ruksar-khatun)**.
+This project is open-source and available under the [MIT License](LICENSE).
