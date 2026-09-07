@@ -1,30 +1,31 @@
-# 🌿 SpendWise
-
+# SpendWise 💳🌱
 > *"Understand your money. Control your spending."*
 
-SpendWise is a modern, premium personal finance management dashboard engineered with **React 19**, **TypeScript**, **Tailwind CSS**, and **Recharts**. Designed with a restrained, clean FinTech aesthetic, SpendWise delivers powerful real-time cashflow analytics, dynamic health scoring, category budget management, and interactive savings goals with persistent browser storage.
+SpendWise is a modern personal finance management dashboard engineered with a clean, high-density FinTech aesthetic. It empowers users to track income and expenses, plan category budgets, analyze spending trends with interactive charts, monitor savings goals with milestone celebrations, and evaluate overall financial health through a dynamic 100-point scoring algorithm.
 
 ---
 
-## ✨ Features
+## 🌟 Key Features
 
 ### 1. 📊 Overview Dashboard
-- **Financial Summary Cards**: Real-time KPI cards for **Total Balance** (₹42,580), **Monthly Income** (₹50,000), **Monthly Expenses** (₹27,420), and **Savings** (₹22,580) with percentage comparisons and status indicators.
-- **Interactive Spending Overview**: Responsive Recharts area chart with smooth monotone curves, teal gradient fills, custom INR tooltips, metric toggles (*Income* | *Expense* | *Savings*), and multi-range selectors (*This Month*, *3 Months*, *6 Months*, *This Year*).
-- **Spending by Category**: Donut chart with center total spend indicator, responsive layout containment, and automatic breakdown legend.
-- **Dynamic Financial Health Score**: 100-point proprietary algorithm evaluating budget adherence (30 pts), savings rate (30 pts), expense consistency (20 pts), and goal progress (20 pts), with an interactive SVG circular gauge and actionable checklist rules.
-- **Recent Transactions & Budget Status**: Visual ledger with merchant icons, semantic income/expense coloring, and live progress bars for category budgets.
-- **Smart Insights**: Contextual observations based on actual financial data.
-- **Savings Goals & Motivation**: Milestone tracking with progress bars, deposit shortcuts, and motivational banners.
+- **Financial Summary Cards**: Four primary KPI cards (*Total Balance*, *Monthly Income*, *Monthly Expenses*, and *Savings*) with month-over-month deltas, circular badges, and quick-action menus.
+- **Interactive Spending Overview**: Responsive Recharts area chart with smooth monotone curves, teal gradient fills, custom INR tooltips, metric toggles (*Income* | *Expense* | *Savings*), and multi-range selectors (*This Month* weekly view, *3 Months*, *6 Months*, *This Year*).
+- **Dedicated "This Month" Weekly Breakdown**: Isolates the active billing cycle into weekly milestones (`W1 (1–7)`, `W2 (8–14)`, `W3 (15–21)`, `W4 (22–30)`) calculated from real-time transactions.
+- **Spending by Category Donut**: Dynamic donut chart with center total spend indicator, responsive layout containment, and automatic breakdown legend.
+- **Dynamic Financial Health Score**: Proprietary 100-point algorithm evaluating budget adherence (30 pts), savings rate (30 pts), expense consistency (20 pts), and goal progress (20 pts), featuring an interactive SVG ring gauge and actionable checklist rules.
+- **Recent Transactions Ledger**: Visual ledger with merchant icons, semantic income/expense coloring, and quick link to the full ledger.
+- **Budget Status**: Visual progress bar for overall monthly budget utilization alongside category breakdown meters.
+- **Smart Insights**: Contextual observations based on actual user financial data.
+- **Savings Goals**: Milestone tracking with progress bars, deposit shortcuts, and motivational banners.
 
-### 2. 💳 Transactions Management
+### 2. 💳 Full Transactions Management
 - Complete CRUD capabilities: Add, Edit, and Delete transactions with instant dashboard recalculations.
 - Segmented type filters (*All*, *Income*, *Expense*), category filters, live keyword search, and multi-criteria sorting (newest, oldest, highest/lowest amount).
 - Interactive modals with strict form validation and delete confirmation safeguards.
 
 ### 3. 🎯 Monthly Budgets
 - Overall budget hero card comparing current burn against total limits.
-- Category budget cards (Food, Shopping, Transport, Bills, Entertainment, Health, Other) with visual warning thresholds (80% approaching limit, 100%+ exceeded).
+- Category budget cards (*Food*, *Shopping*, *Transport*, *Bills*, *Entertainment*, *Health*, *Other*) with visual warning thresholds (80% approaching limit, 100%+ exceeded).
 - "+ Set Budget" modal for instant monthly limit adjustments.
 
 ### 4. 📈 Financial Analytics
@@ -39,7 +40,7 @@ SpendWise is a modern, premium personal finance management dashboard engineered 
 - Celebratory confetti animation and *"Goal Completed"* badge upon reaching 100% target funding.
 
 ### 6. ⚙️ Settings, Dark Mode & Data Control
-- User profile personalization (Name, Email, Avatar).
+- User profile personalization (*Name*, *Email*, *Avatar*).
 - Multi-currency support (₹ INR, $ USD, € EUR, £ GBP).
 - High-contrast **Dark Mode** toggle persisted across sessions.
 - Notification toggles for budget alerts, payment reminders, and weekly summaries.
@@ -71,7 +72,7 @@ SpendWise follows a disciplined, soft pastel FinTech visual language:
 - **Charts**: [Recharts 3](https://recharts.org/)
 - **Icons**: [Lucide React](https://lucide.dev/)
 - **Effects**: [Canvas Confetti](https://www.npmjs.com/package/canvas-confetti)
-- **Typography**: Plus Jakarta Sans
+- **Typography**: [Plus Jakarta Sans](https://fonts.google.com/specimen/Plus+Jakarta+Sans)
 
 ---
 
@@ -154,4 +155,4 @@ SpendWise operates with **privacy-first architecture**. 100% of your financial d
 
 ## 👤 Author
 
-Developed by **[Ruksar Khatun](https://github.com/ruksar-khatun)**.
+Developed with care by **[Ruksar Khatun](https://github.com/ruksar-khatun)**.
