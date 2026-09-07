@@ -1,6 +1,7 @@
 import React from 'react';
 import { useFinance } from '../../context/FinanceContext';
-import { User, Mail, Shield, Award, Calendar, ExternalLink } from 'lucide-react';
+import { Mail, Shield, Award, Calendar } from 'lucide-react';
+import { UserAvatar } from '../common/UserAvatar';
 
 export const ProfilePage: React.FC = () => {
   const { settings, setActivePage, healthScore, transactions, goals } = useFinance();
@@ -18,10 +19,11 @@ export const ProfilePage: React.FC = () => {
 
       {/* Hero Profile Card */}
       <div className="fintech-card p-6 flex flex-col sm:flex-row items-center gap-6">
-        <img
+        <UserAvatar
           src={settings.avatarUrl}
           alt={settings.name}
-          className="w-24 h-24 rounded-full object-cover ring-4 ring-teal-500/30 shadow-md"
+          size="xl"
+          className="ring-4 ring-teal-500/30 shadow-md"
         />
         <div className="flex-1 text-center sm:text-left">
           <div className="flex flex-col sm:flex-row sm:items-center gap-2">

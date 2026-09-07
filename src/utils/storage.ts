@@ -64,7 +64,12 @@ export const storage = {
   getSettings: (): UserSettings => {
     try {
       const data = localStorage.getItem(KEYS.SETTINGS);
-      return data ? JSON.parse(data) : INITIAL_SETTINGS;
+      if (!data) return INITIAL_SETTINGS;
+      const parsed = JSON.parse(data);
+      if (!parsed.avatarUrl || parsed.avatarUrl.includes('unsplash.com')) {
+        parsed.avatarUrl = '/avatar.svg';
+      }
+      return parsed;
     } catch {
       return INITIAL_SETTINGS;
     }

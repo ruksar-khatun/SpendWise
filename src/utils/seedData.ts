@@ -3,7 +3,7 @@ import { Transaction, Budget, SavingsGoal, UserSettings } from '../types';
 export const INITIAL_SETTINGS: UserSettings = {
   name: 'Ruks',
   email: 'ruks@example.com',
-  avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=256&h=256',
+  avatarUrl: '/avatar.svg',
   currency: '₹',
   theme: 'light',
   notifications: {

@@ -15,6 +15,7 @@ import {
   DollarSign,
 } from 'lucide-react';
 import { DeleteConfirmModal } from '../modals/DeleteConfirmModal';
+import { UserAvatar } from '../common/UserAvatar';
 
 export const SettingsPage: React.FC = () => {
   const {
@@ -74,10 +75,11 @@ export const SettingsPage: React.FC = () => {
           </div>
 
           <div className="mt-5 flex flex-col sm:flex-row items-start sm:items-center gap-5">
-            <img
+            <UserAvatar
               src={settings.avatarUrl}
               alt={settings.name}
-              className="w-16 h-16 rounded-full object-cover ring-4 ring-teal-500/20"
+              size="lg"
+              className="ring-4 ring-teal-500/20"
             />
             <div className="flex-1 w-full grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>

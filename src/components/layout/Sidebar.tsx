@@ -1,6 +1,7 @@
 import React from 'react';
 import { useFinance } from '../../context/FinanceContext';
 import { ActiveNavPage } from '../../types';
+import { UserAvatar } from '../common/UserAvatar';
 import {
   LayoutGrid,
   FileText,
@@ -147,10 +148,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ onCloseMobileMenu }) => {
           className="flex items-center justify-between p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/60 cursor-pointer transition"
         >
           <div className="flex items-center gap-2.5 min-w-0">
-            <img
+            <UserAvatar
               src={settings.avatarUrl}
               alt={settings.name}
-              className="w-9 h-9 rounded-full object-cover ring-2 ring-brand-500/20"
+              size="md"
+              className="ring-2 ring-brand-500/20"
             />
             <div className="min-w-0">
               <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">{settings.name}</p>
