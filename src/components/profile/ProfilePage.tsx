@@ -13,7 +13,7 @@ export const ProfilePage: React.FC = () => {
           Account Profile
         </h1>
         <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">
-          Manage your personal credentials and membership tier.
+          Manage your personal credentials and account details.
         </p>
       </div>
 
@@ -26,12 +26,7 @@ export const ProfilePage: React.FC = () => {
           className="ring-4 ring-teal-500/30 shadow-md"
         />
         <div className="flex-1 text-center sm:text-left">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-            <h2 className="text-xl font-extrabold text-slate-900 dark:text-white">{settings.name}</h2>
-            <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-bold bg-teal-100 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 w-max self-center sm:self-auto">
-              Pro Member
-            </span>
-          </div>
+          <h2 className="text-xl font-extrabold text-slate-900 dark:text-white">{settings.name}</h2>
           <p className="text-xs text-slate-400 dark:text-slate-500 mt-1 flex items-center justify-center sm:justify-start gap-1.5">
             <Mail className="w-3.5 h-3.5" /> {settings.email}
           </p>
@@ -57,7 +52,7 @@ export const ProfilePage: React.FC = () => {
           <p className="text-2xl font-bold text-slate-900 dark:text-white mt-2">
             {healthScore.score} <span className="text-xs font-normal text-slate-400">/ 100</span>
           </p>
-          <span className="text-xs font-bold text-emerald-600">{healthScore.status} Tier</span>
+          <span className="text-xs font-bold text-emerald-600">{healthScore.status} Standing</span>
         </div>
 
         <div className="fintech-card p-5">
