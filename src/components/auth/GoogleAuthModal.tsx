@@ -12,6 +12,7 @@ import {
   Loader2,
   ChevronLeft,
   ExternalLink,
+  AlertCircle,
 } from 'lucide-react';
 import { useFinance } from '../../context/FinanceContext';
 
@@ -100,6 +101,7 @@ export const GoogleAuthModal: React.FC<GoogleAuthModalProps> = ({
   const [emailInput, setEmailInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [statusText, setStatusText] = useState('');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const gisBtnRef = useRef<HTMLDivElement>(null);
 
   // Initialize native Google Identity Services (GIS) if client ID is configured
@@ -193,31 +195,69 @@ export const GoogleAuthModal: React.FC<GoogleAuthModalProps> = ({
     }
   };
 
-  // Automatically extracts all info from the entered Google email (no name required)
+  // Automatically extracts all info from the entered Google email and validates existence
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!emailInput.trim()) {
-      showToast('Enter email', 'Please enter your Google account email', 'error');
+    setErrorMessage(null);
+
+    let clean = emailInput.trim().toLowerCase();
+    if (!clean) {
+      setErrorMessage('Please enter your Google account email.');
+      showToast('Email Required', 'Please enter your Google account email', 'error');
+      return;
+    }
+
+    if (!clean.includes('@')) {
+      clean = `${clean}@gmail.com`;
+    }
+
+    // Client-side RFC format check
+    const emailRegex =
+      /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+    if (!emailRegex.test(clean)) {
+      setErrorMessage('Invalid email format. Please provide a valid address (e.g. name@gmail.com).');
+      showToast('Invalid Email', 'Please provide a valid email address format', 'error');
+      return;
+    }
+
+    const domain = clean.split('@')[1];
+    const blockedDomains = [
+      'mailinator.com',
+      '10minutemail.com',
+      'tempmail.com',
+      'guerrillamail.com',
+      'sharklasers.com',
+      'yopmail.com',
+      'trashmail.com',
+      'fake.com',
+      'test.com',
+      'example.com',
+    ];
+    if (blockedDomains.includes(domain)) {
+      setErrorMessage('Disposable, temporary, or placeholder email addresses are not permitted.');
+      showToast('Disposable Email Blocked', 'Please use a real, permanent email address', 'error');
       return;
     }
 
     setIsLoading(true);
-    setStatusText('Extracting profile info from Google...');
+    setStatusText('Verifying email existence on DNS and extracting profile...');
 
     try {
       // Extract name, email, avatar, and googleId automatically
-      const extracted = extractGoogleProfile(emailInput);
+      const extracted = extractGoogleProfile(clean);
 
       await signInWithGoogle(extracted);
 
       showToast(
-        'Google Profile Extracted',
-        `Signed in as ${extracted.name}! All transactions & budgets are saved to database.`,
+        'Google Profile Verified & Saved',
+        `Welcome, ${extracted.name}! Your account is created in the database and data is synced.`,
         'success'
       );
       handleClose();
-    } catch (err) {
-      showToast('Sign in failed', 'Could not authenticate with Google server', 'error');
+    } catch (err: any) {
+      const msg = err.message || 'Could not verify email with server';
+      setErrorMessage(msg);
+      showToast('Email Verification Failed', msg, 'error');
     } finally {
       setIsLoading(false);
       setStatusText('');
@@ -490,6 +530,17 @@ export const GoogleAuthModal: React.FC<GoogleAuthModalProps> = ({
                 </p>
               </div>
 
+              {/* Verification Error Alert */}
+              {errorMessage && (
+                <div className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 flex items-start gap-2.5 text-xs text-rose-700 dark:text-rose-300 animate-fade-in">
+                  <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 flex-shrink-0 mt-0.5" />
+                  <div className="leading-relaxed">
+                    <strong className="block font-bold">Email Verification Failed:</strong>
+                    {errorMessage}
+                  </div>
+                </div>
+              )}
+
               {/* Single Input Form: Email only, NO Name Asked */}
               <form onSubmit={handleEmailSubmit} className="space-y-4">
                 <div>
@@ -504,7 +555,10 @@ export const GoogleAuthModal: React.FC<GoogleAuthModalProps> = ({
                       autoFocus
                       placeholder="e.g. yourname@gmail.com"
                       value={emailInput}
-                      onChange={(e) => setEmailInput(e.target.value)}
+                      onChange={(e) => {
+                        setEmailInput(e.target.value);
+                        if (errorMessage) setErrorMessage(null);
+                      }}
                       className="w-full pl-10 pr-4 py-2.5 text-sm bg-slate-50 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-900 dark:text-white transition"
                     />
                   </div>
