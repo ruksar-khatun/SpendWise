@@ -55,6 +55,9 @@ interface FinanceContextType {
 
   // Navigation & Page State
   setActivePage: (page: ActiveNavPage) => void;
+  goBack: () => void;
+  canGoBack: boolean;
+  previousPage: ActiveNavPage | null;
   setSelectedMonth: (month: string) => void;
   setSearchQuery: (q: string) => void;
   toggleTheme: () => void;
@@ -112,7 +115,35 @@ export const FinanceProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [settings, setSettings] = useState<UserSettings>(() => storage.getSettings());
   const [theme, setThemeState] = useState<'light' | 'dark'>(() => storage.getTheme());
   const [selectedMonth, setSelectedMonth] = useState<string>('2026-09');
-  const [activePage, setActivePage] = useState<ActiveNavPage>('overview');
+  const [activePage, setActivePageState] = useState<ActiveNavPage>('overview');
+  const [navHistory, setNavHistory] = useState<ActiveNavPage[]>(['overview']);
+
+  const setActivePage = (page: ActiveNavPage) => {
+    setActivePageState(page);
+    setNavHistory((prev) => (prev[prev.length - 1] === page ? prev : [...prev, page]));
+  };
+
+  const goBack = () => {
+    setNavHistory((prev) => {
+      if (prev.length > 1) {
+        const next = prev.slice(0, prev.length - 1);
+        setActivePageState(next[next.length - 1]);
+        return next;
+      }
+      setActivePageState('overview');
+      return ['overview'];
+    });
+  };
+
+  const canGoBack = activePage !== 'overview' || navHistory.length > 1;
+
+  const previousPage = useMemo<ActiveNavPage | null>(() => {
+    if (navHistory.length > 1) {
+      return navHistory[navHistory.length - 2];
+    }
+    return activePage !== 'overview' ? 'overview' : null;
+  }, [navHistory, activePage]);
+
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [toasts, setToasts] = useState<ToastItem[]>([]);
 
@@ -623,6 +654,9 @@ export const FinanceProvider: React.FC<{ children: ReactNode }> = ({ children })
         logoutUser,
 
         setActivePage,
+        goBack,
+        canGoBack,
+        previousPage,
         setSelectedMonth,
         setSearchQuery,
         toggleTheme,

@@ -20,6 +20,7 @@ import { AddMoneyModal } from './components/modals/AddMoneyModal';
 import { BudgetModal } from './components/modals/BudgetModal';
 import { ImportStatementModal } from './components/transactions/ImportStatementModal';
 import { GoogleAuthModal } from './components/auth/GoogleAuthModal';
+import { PageBackButton } from './components/common/PageBackButton';
 import { Transaction, SavingsGoal } from './types';
 
 const MainAppContent: React.FC = () => {
@@ -66,6 +67,12 @@ const MainAppContent: React.FC = () => {
         {/* Scrollable Page View */}
         <main className="flex-1 overflow-y-auto px-4 sm:px-8 py-4 sm:py-6 pb-20 lg:pb-10">
           <div className="max-w-7xl mx-auto">
+            {/* Persistent Back Button on Any Non-Overview Tab */}
+            {activePage !== 'overview' && (
+              <div className="mb-4">
+                <PageBackButton />
+              </div>
+            )}
             {activePage === 'overview' && (
               <OverviewPage onOpenDepositModal={(id: string) => setDepositGoalId(id)} />
             )}
