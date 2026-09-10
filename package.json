@@ -3,6 +3,11 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
+  "homepage": "https://spendwise-fintech.vercel.app",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ruksar-khatun/SpendWise.git"
+  },
   "scripts": {
     "dev": "concurrently -n \"server,client\" -c \"cyan,magenta\" \"npm --prefix server run dev\" \"vite\"",
     "dev:client": "vite",

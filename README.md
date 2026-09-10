@@ -1,10 +1,36 @@
 # 🌿 SpendWise — Full-Stack Personal Finance & Wealth Platform
 
+<p align="left">
+  <a href="https://spendwise-fintech.vercel.app" target="_blank">
+    <img src="https://img.shields.io/badge/🚀_Live_Demo-spendwise--fintech.vercel.app-0D9488?style=for-the-badge&logo=vercel&logoColor=white" alt="Live Demo" />
+  </a>
+  <a href="https://spendwise-api.onrender.com/api/health" target="_blank">
+    <img src="https://img.shields.io/badge/API_Health-Render_Live-46E3B7?style=for-the-badge&logo=express&logoColor=black" alt="API Health" />
+  </a>
+  <a href="https://github.com/ruksar-khatun/SpendWise" target="_blank">
+    <img src="https://img.shields.io/badge/GitHub-ruksar--khatun%2FSpendWise-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Repo" />
+  </a>
+  <a href="https://opensource.org/licenses/MIT" target="_blank">
+    <img src="https://img.shields.io/badge/License-MIT-F59E0B?style=for-the-badge" alt="License" />
+  </a>
+</p>
+
 > **"Understand your money. Control your spending."**
 
 SpendWise is a production-grade **Full-Stack FinTech platform** featuring a modern **React 19 + TypeScript** dashboard, a robust **Node.js + Express + TypeScript** REST API, and a relational database powered by **Prisma ORM**.
 
 Designed with a clean, pastel fintech aesthetic, SpendWise empowers users to track cash flow, manage dynamic category budgets, visualize time-series spending velocity, hit savings milestones, and calculate real-time algorithmic **Financial Health Scores**.
+
+---
+
+## 🌐 Live Deployment & Project Links
+
+| Resource | Direct Link | Status / Note |
+| :--- | :--- | :--- |
+| 🚀 **Live Web Application (Vercel)** | [https://spendwise-fintech.vercel.app](https://spendwise-fintech.vercel.app) | Production SPA Dashboard |
+| ⚡ **Backend REST API (Render)** | [https://spendwise-api.onrender.com/api/health](https://spendwise-api.onrender.com/api/health) | Live Health Check & JSON API |
+| 🐙 **GitHub Repository** | [https://github.com/ruksar-khatun/SpendWise](https://github.com/ruksar-khatun/SpendWise) | Source Code, Issues & PRs |
+| 🔑 **1-Click Demo Profiles** | `ruksar.khatun@gmail.com` / `alex.morgan@gmail.com` | Instant Google Sign-In with Pre-seeded Data |
 
 ---
 
