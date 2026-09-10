@@ -12,7 +12,7 @@ export interface ParsedTransactionPreview {
   selected: boolean;
 }
 
-// Category keyword mappings for Indian UPI / GPay merchants
+// Category keyword mappings for Indian Banks & UPI merchants
 const CATEGORY_RULES: { category: CategoryName; keywords: string[] }[] = [
   {
     category: 'Food',
@@ -20,7 +20,8 @@ const CATEGORY_RULES: { category: CategoryName; keywords: string[] }[] = [
       'swiggy', 'zomato', 'starbucks', 'blue tokai', 'mcdonald', 'burger king',
       'subway', 'domino', 'pizza', 'kfc', 'chai', 'tea', 'coffee', 'cafe',
       'blinkit', 'zepto', 'instamart', 'groceries', 'grocery', 'supermarket',
-      'nature basket', 'dmart', 'd-mart', 'bakery', 'restaurant', 'sweets', 'eats'
+      'nature basket', 'dmart', 'd-mart', 'bakery', 'restaurant', 'sweets', 'eats',
+      'bigbasket', 'food'
     ],
   },
   {
@@ -28,7 +29,7 @@ const CATEGORY_RULES: { category: CategoryName; keywords: string[] }[] = [
     keywords: [
       'uber', 'ola', 'rapido', 'metro', 'railway', 'irctc', 'petrol', 'fuel',
       'shell', 'indian oil', 'hpcl', 'bpcl', 'fastag', 'toll', 'parking',
-      'auto', 'cab', 'flight', 'indigo', 'air india', 'redbus'
+      'auto', 'cab', 'flight', 'indigo', 'air india', 'redbus', 'transport'
     ],
   },
   {
@@ -36,7 +37,7 @@ const CATEGORY_RULES: { category: CategoryName; keywords: string[] }[] = [
     keywords: [
       'amazon', 'flipkart', 'myntra', 'ajio', 'zara', 'h&m', 'uniqlo',
       'croma', 'reliance digital', 'apple', 'nike', 'adidas', 'clothing',
-      'mall', 'retail', 'meesho', 'nykaa', 'tata cliq'
+      'mall', 'retail', 'meesho', 'nykaa', 'tata cliq', 'shopping'
     ],
   },
   {
@@ -44,7 +45,7 @@ const CATEGORY_RULES: { category: CategoryName; keywords: string[] }[] = [
     keywords: [
       'electricity', 'bescom', 'cesc', 'tneb', 'power', 'airtel', 'jio',
       'vodafone', 'vi ', 'broadband', 'wifi', 'fiber', 'adani gas', 'gas',
-      'billdesk', 'water', 'utility', 'recharge', 'dth', 'tata play'
+      'billdesk', 'water', 'utility', 'recharge', 'dth', 'tata play', 'bill'
     ],
   },
   {
@@ -60,14 +61,14 @@ const CATEGORY_RULES: { category: CategoryName; keywords: string[] }[] = [
     keywords: [
       'apollo', 'pharmacy', 'chemist', 'cult', 'cult.fit', 'gym', 'fitness',
       '1mg', 'practo', 'hospital', 'clinic', 'doctor', 'medplus', 'lab',
-      'diagnostics', 'pharmeasy'
+      'diagnostics', 'pharmeasy', 'health'
     ],
   },
   {
     category: 'Salary',
     keywords: [
       'salary', 'payroll', 'techcorp', 'infotech', 'wipro', 'infosys', 'tcs',
-      'stipend', 'monthly pay'
+      'stipend', 'monthly pay', 'salary credit'
     ],
   },
   {
@@ -81,53 +82,70 @@ const CATEGORY_RULES: { category: CategoryName; keywords: string[] }[] = [
 ];
 
 /**
- * Sanitizes merchant name by stripping phone numbers, UPI VPA handles (@okhdfc, @okaxis), and account numbers.
+ * Sanitizes bank narration into clean, human-readable merchant names.
+ * Handles Indian bank formats (HDFC, SBI, ICICI, Axis, Kotak) and UPI strings.
  */
 export const sanitizeMerchantName = (rawText: string): { cleanDescription: string; merchant: string } => {
   let text = rawText.trim();
 
-  // Strip UPI VPA suffix like /UPI/123456/CR/xyz@okaxis or 9876543210@paytm
-  text = text.replace(/\/UPI\/[A-Za-z0-9]+/gi, '');
-  text = text.replace(/UPI-[A-Za-z0-9\-]+/gi, '');
-  text = text.replace(/[\w.-]+@(okhdfcbank|okaxis|oksbi|okicici|paytm|ybl|ibl|upi)/gi, '');
+  // Strip bank narration prefixes:
+  // e.g. "TO TRANSFER-UPI/DR/62912345/SWIGGY/ICICI/" -> "SWIGGY"
+  // e.g. "NEFT CR-TECHCORP-SALARY-12345" -> "TECHCORP SALARY"
+  // e.g. "ACH D-BESCOM ELECTRICITY BILL-98765" -> "BESCOM ELECTRICITY BILL"
+  // e.g. "POS 4012XXXXXXXX1234 STARBUCKS INDIRANAGAR" -> "STARBUCKS INDIRANAGAR"
+  text = text.replace(/^(TO\s+TRANSFER[-–]?|TRANSFER[-–]?|BY\s+TRANSFER[-–]?)/gi, '');
+  text = text.replace(/^(NEFT|RTGS|IMPS|ACH|ECS|NACH)\s*(CR|DR)?[-–\s]+/gi, '');
+  text = text.replace(/^POS\s+[xX0-9*\-]+\s+/gi, '');
+  text = text.replace(/UPI\s*[-–\/]\s*(DR|CR)?\s*[-–\/]?\s*\d*[-–\/]?/gi, '');
 
-  // Strip 10-digit phone numbers
+  // Strip UPI handles (@okhdfcbank, @okaxis, @oksbi, @paytm, etc.)
+  text = text.replace(/[\w.-]+@(okhdfcbank|okaxis|oksbi|okicici|paytm|ybl|ibl|upi|axl)/gi, '');
+
+  // Strip long reference numbers and alphanumeric transaction hashes
+  text = text.replace(/\b[0-9]{8,16}\b/g, '');
+  text = text.replace(/\b[A-Za-z0-9]{12,20}\b/g, '');
+
+  // Strip phone numbers
   text = text.replace(/\b[6-9]\d{9}\b/g, '');
 
-  // Strip Account number references like A/C ...4821 or XX1234
+  // Strip account number references
   text = text.replace(/\b(A\/c|Acct|Acc|A\/C|Account)?\s*(no\.?|#)?\s*[xX*]{2,}\d{2,4}\b/gi, '');
 
-  // Clean trailing/leading dashes, slashes, or double spaces
-  text = text.replace(/[_\-/|\\]+/g, ' ').replace(/\s+/g, ' ').trim();
+  // Clean trailing/leading delimiters and excessive spaces
+  text = text.replace(/[_\-/|\\:]+/g, ' ').replace(/\s+/g, ' ').trim();
 
-  if (!text) {
-    text = 'UPI Transaction';
+  if (!text || text.length < 2) {
+    text = 'Bank Transaction';
   }
 
-  // Derive short merchant name
-  const words = text.split(' ');
-  const merchant = words.slice(0, 3).join(' ');
+  // Capitalize properly
+  const words = text
+    .split(' ')
+    .filter(w => w.length > 0 && !/^\d+$/.test(w))
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
 
-  return { cleanDescription: text, merchant };
+  const cleanDescription = words.slice(0, 5).join(' ') || 'Bank Transaction';
+  const merchant = words.slice(0, 2).join(' ') || 'Merchant';
+
+  return { cleanDescription, merchant };
 };
 
 /**
- * Automatically predicts the most accurate category based on description and merchant keywords.
+ * Automatically predicts category based on cleaned merchant and description.
  */
 export const detectCategory = (
   description: string,
   merchant: string,
   type: TransactionType
 ): { category: CategoryName | string; confidence: 'high' | 'medium' | 'default' } => {
+  const combined = `${description} ${merchant}`.toLowerCase();
+
   if (type === 'income') {
-    const lower = `${description} ${merchant}`.toLowerCase();
-    if (lower.includes('salary') || lower.includes('payroll')) return { category: 'Salary', confidence: 'high' };
-    if (lower.includes('freelance') || lower.includes('client')) return { category: 'Freelance', confidence: 'high' };
-    if (lower.includes('dividend') || lower.includes('interest') || lower.includes('zerodha')) return { category: 'Investments', confidence: 'high' };
+    if (combined.includes('salary') || combined.includes('payroll') || combined.includes('techcorp')) return { category: 'Salary', confidence: 'high' };
+    if (combined.includes('freelance') || combined.includes('client')) return { category: 'Freelance', confidence: 'high' };
+    if (combined.includes('dividend') || combined.includes('interest') || combined.includes('zerodha')) return { category: 'Investments', confidence: 'high' };
     return { category: 'Salary', confidence: 'medium' };
   }
-
-  const combined = `${description} ${merchant}`.toLowerCase();
 
   for (const rule of CATEGORY_RULES) {
     for (const keyword of rule.keywords) {
@@ -141,17 +159,15 @@ export const detectCategory = (
 };
 
 /**
- * Normalizes different date representations (DD/MM/YYYY, MM/DD/YYYY, YYYY-MM-DD, Month DD YYYY) into YYYY-MM-DD.
+ * Normalizes different date representations (DD/MM/YYYY, MM/DD/YYYY, YYYY-MM-DD, DD-MM-YYYY) into YYYY-MM-DD.
  */
 export const normalizeDate = (rawDate: string): string => {
   const trimmed = rawDate.trim();
 
-  // Already YYYY-MM-DD
   if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
     return trimmed;
   }
 
-  // DD/MM/YYYY or DD-MM-YYYY
   const dmyMatch = trimmed.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
   if (dmyMatch) {
     const day = dmyMatch[1].padStart(2, '0');
@@ -160,13 +176,11 @@ export const normalizeDate = (rawDate: string): string => {
     return `${year}-${month}-${day}`;
   }
 
-  // Parse using Date constructor fallback
   const parsed = new Date(trimmed);
   if (!isNaN(parsed.getTime())) {
     return parsed.toISOString().split('T')[0];
   }
 
-  // Fallback to current date
   return new Date().toISOString().split('T')[0];
 };
 
@@ -183,7 +197,7 @@ const parseCSVLine = (line: string): string[] => {
     if (char === '"') {
       if (inQuotes && line[i + 1] === '"') {
         current += '"';
-        i++; // skip escaped quote
+        i++;
       } else {
         inQuotes = !inQuotes;
       }
@@ -199,7 +213,7 @@ const parseCSVLine = (line: string): string[] => {
 };
 
 /**
- * Main CSV Parser for Google Pay, PhonePe, and UPI bank exports.
+ * Universal CSV Parser for Bank Statements (HDFC, SBI, ICICI, Axis, Kotak) & UPI exports.
  */
 export const parseStatementCSV = (csvContent: string): ParsedTransactionPreview[] => {
   const lines = csvContent
@@ -209,44 +223,70 @@ export const parseStatementCSV = (csvContent: string): ParsedTransactionPreview[
 
   if (lines.length < 2) return [];
 
-  const headers = parseCSVLine(lines[0]).map(h => h.toLowerCase().replace(/[^a-z0-9]/g, ''));
+  // Find the header row (sometimes bank statements have 1-3 lines of metadata above table)
+  let headerRowIndex = 0;
+  for (let i = 0; i < Math.min(lines.length, 10); i++) {
+    const row = lines[i].toLowerCase();
+    if (
+      (row.includes('date') || row.includes('txn')) &&
+      (row.includes('narration') || row.includes('desc') || row.includes('particular') || row.includes('amount') || row.includes('withdrawal') || row.includes('debit'))
+    ) {
+      headerRowIndex = i;
+      break;
+    }
+  }
 
-  // Detect column indexes
-  let dateIdx = headers.findIndex(h => h.includes('date') || h.includes('time'));
-  let descIdx = headers.findIndex(h => h.includes('desc') || h.includes('narration') || h.includes('detail') || h.includes('merchant') || h.includes('payee') || h.includes('name'));
-  let amountIdx = headers.findIndex(h => h.includes('amount') || h.includes('withdrawal') || h.includes('debit') || h.includes('total'));
-  let creditIdx = headers.findIndex(h => h.includes('credit') || h.includes('deposit'));
+  const headers = parseCSVLine(lines[headerRowIndex]).map(h => h.toLowerCase().replace(/[^a-z0-9]/g, ''));
+
+  // Detect column indexes across Indian and international bank conventions
+  let dateIdx = headers.findIndex(h => h.includes('date') || h.includes('time') || h.includes('txndate') || h.includes('valuedate'));
+  let descIdx = headers.findIndex(h => h.includes('desc') || h.includes('narration') || h.includes('particular') || h.includes('remark') || h.includes('detail') || h.includes('merchant') || h.includes('payee'));
+  let withdrawalIdx = headers.findIndex(h => h.includes('withdrawal') || h.includes('debit') || h.includes('dr') || h.includes('paidout'));
+  let depositIdx = headers.findIndex(h => h.includes('deposit') || h.includes('credit') || h.includes('cr') || h.includes('paidin'));
+  let amountIdx = headers.findIndex(h => h.includes('amount') || h.includes('total'));
   let typeIdx = headers.findIndex(h => h.includes('type') || h.includes('status') || h.includes('crdr'));
 
   if (dateIdx === -1) dateIdx = 0;
   if (descIdx === -1) descIdx = 1;
-  if (amountIdx === -1) amountIdx = 2;
 
   const results: ParsedTransactionPreview[] = [];
 
-  for (let i = 1; i < lines.length; i++) {
+  for (let i = headerRowIndex + 1; i < lines.length; i++) {
     const cols = parseCSVLine(lines[i]);
     if (cols.length < 2) continue;
 
     const rawDate = cols[dateIdx] || '';
-    const rawDesc = cols[descIdx] || 'Payment';
-    let rawAmount = cols[amountIdx] || '0';
-    let rawCredit = creditIdx >= 0 ? cols[creditIdx] : '';
-    let rawType = typeIdx >= 0 ? cols[typeIdx].toLowerCase() : '';
-
-    // Determine type & clean amount
+    const rawDesc = cols[descIdx] || 'Bank Transaction';
+    
+    // Check withdrawal vs deposit columns
     let type: TransactionType = 'expense';
-    let cleanAmountStr = rawAmount.replace(/[^0-9.]/g, '');
+    let amount = 0;
 
-    if (rawCredit && parseFloat(rawCredit.replace(/[^0-9.]/g, '')) > 0) {
+    const rawWithdrawal = withdrawalIdx >= 0 ? cols[withdrawalIdx] : '';
+    const rawDeposit = depositIdx >= 0 ? cols[depositIdx] : '';
+    const rawAmount = amountIdx >= 0 ? cols[amountIdx] : '';
+    const rawType = typeIdx >= 0 ? cols[typeIdx].toLowerCase() : '';
+
+    const withdrawalVal = parseFloat(rawWithdrawal.replace(/[^0-9.]/g, ''));
+    const depositVal = parseFloat(rawDeposit.replace(/[^0-9.]/g, ''));
+    const generalAmountVal = parseFloat(rawAmount.replace(/[^0-9.]/g, ''));
+
+    if (!isNaN(depositVal) && depositVal > 0) {
       type = 'income';
-      cleanAmountStr = rawCredit.replace(/[^0-9.]/g, '');
-    } else if (rawType.includes('cr') || rawType.includes('credit') || rawType.includes('deposit') || rawType.includes('received')) {
-      type = 'income';
+      amount = depositVal;
+    } else if (!isNaN(withdrawalVal) && withdrawalVal > 0) {
+      type = 'expense';
+      amount = withdrawalVal;
+    } else if (!isNaN(generalAmountVal) && generalAmountVal > 0) {
+      amount = generalAmountVal;
+      if (rawType.includes('cr') || rawType.includes('credit') || rawType.includes('deposit') || rawType.includes('received')) {
+        type = 'income';
+      } else {
+        type = 'expense';
+      }
     }
 
-    const amount = parseFloat(cleanAmountStr);
-    if (isNaN(amount) || amount <= 0) continue;
+    if (amount <= 0 || isNaN(amount)) continue;
 
     const date = normalizeDate(rawDate);
     const { cleanDescription, merchant } = sanitizeMerchantName(rawDesc);
@@ -269,7 +309,36 @@ export const parseStatementCSV = (csvContent: string): ParsedTransactionPreview[
 };
 
 /**
- * Realistic synthetic Google Pay UPI statement for safe, 1-click testing.
+ * 🏦 HDFC Bank Statement Sample
+ */
+export const SAMPLE_HDFC_BANK_CSV = `Date,Narration,Chq/Ref No,Value Dt,Withdrawal Amt.,Deposit Amt.,Closing Balance
+01/09/2026,NEFT CR-TECHCORP PVT LTD-SALARY-CREDIT,N0901234,01/09/2026,,50000.00,52340.00
+02/09/2026,UPI-SWIGGY FOOD DELIVERY-BANGALORE,UPI0902123,02/09/2026,420.00,,51920.00
+03/09/2026,UPI-UBER RIDE MUMBAI COMMUTE,UPI0903124,03/09/2026,180.00,,51740.00
+04/09/2026,POS 4012XXXXXXXX1234 STARBUCKS COFFEE,POS090412,04/09/2026,390.00,,51350.00
+05/09/2026,ACH D-BESCOM ELECTRICITY MONTHLY BILL,ACH09051,05/09/2026,1850.00,,49500.00
+05/09/2026,UPI-AMAZON INDIA SHOPPING ELECTRONICS,UPI090678,05/09/2026,2499.00,,47001.00
+06/09/2026,NETFLIX INDIA RECURRING SUBSCRIPTION,SUB09069,06/09/2026,649.00,,46352.00
+07/09/2026,UPI-APOLLO PHARMACY HEALTH MEDICINES,UPI090712,07/09/2026,520.00,,45832.00
+07/09/2026,UPI-ZEPTO INSTANT GROCERIES AND VEGGIES,UPI090834,07/09/2026,780.00,,45052.00
+08/09/2026,UPI-AIRTEL FIBER HIGH SPEED BROADBAND,UPI090945,08/09/2026,999.00,,44053.00
+08/09/2026,UPI-ZARA CLOTHING WORK APPAREL,UPI091056,08/09/2026,3450.00,,40603.00`;
+
+/**
+ * 🏛️ State Bank of India (SBI) Statement Sample
+ */
+export const SAMPLE_SBI_BANK_CSV = `Txn Date,Description,Ref No./Cheque No.,Debit,Credit,Balance
+01-09-2026,SALARY BY TECHCORP INDIA LTD,SBIN090123,,50000.00,50840.00
+02-09-2026,TO TRANSFER-UPI/DR/62912345/SWIGGY EATS/ICICI/,TRANSFER-12,420.00,,50420.00
+03-09-2026,TO TRANSFER-UPI/DR/62912346/UBER INDIA/HDFC/,TRANSFER-13,280.00,,50140.00
+04-09-2026,TO TRANSFER-UPI/DR/62912347/BLINKIT GROCERY STORE/,TRANSFER-14,650.00,,49490.00
+05-09-2026,TO TRANSFER-UPI/DR/62912348/BESCOM POWER UTILITY/,TRANSFER-15,1640.00,,47850.00
+06-09-2026,TO TRANSFER-UPI/DR/62912349/AMAZON INDIA RETAIL/,TRANSFER-16,1899.00,,45951.00
+07-09-2026,TO TRANSFER-UPI/DR/62912350/CULT FIT FITNESS GYM/,TRANSFER-17,2500.00,,43451.00
+08-09-2026,TO TRANSFER-UPI/DR/62912351/METRO RAIL PASS CARD/,TRANSFER-18,500.00,,42951.00`;
+
+/**
+ * 📱 Google Pay / UPI Statement Sample
  */
 export const SAMPLE_GOOGLE_PAY_CSV = `Date,Description,Amount,Transaction Type
 2026-09-08,Swiggy Delivery UPI/6291/swiggy@icici,540,Debit

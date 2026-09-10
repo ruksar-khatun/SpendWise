@@ -4,7 +4,7 @@ import { formatINR } from '../../utils/calculations';
 import { Utensils, Car, ShoppingBag, Zap, Briefcase, Plus, ArrowRight } from 'lucide-react';
 
 export const RecentTransactionsCard: React.FC = () => {
-  const { transactions, setActivePage, setIsAddTransactionOpen } = useFinance();
+  const { transactions, setActivePage, setIsAddTransactionOpen, setIsImportModalOpen } = useFinance();
 
   // Ensure the 5 showcased reference transactions from the image are displayed
   const referenceDisplayTx = [
@@ -84,12 +84,25 @@ export const RecentTransactionsCard: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-base font-bold text-slate-900 dark:text-white">Recent Transactions</h2>
-        <button
-          onClick={() => setActivePage('transactions')}
-          className="text-xs font-semibold text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 flex items-center gap-1 transition"
-        >
-          View all
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => {
+              setActivePage('transactions');
+              setIsImportModalOpen(true);
+            }}
+            className="text-xs font-semibold text-slate-500 hover:text-teal-600 dark:text-slate-400 dark:hover:text-teal-300 transition"
+            title="Import Bank Statement"
+          >
+            Import
+          </button>
+          <button
+            onClick={() => setActivePage('transactions')}
+            className="text-xs font-semibold text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 flex items-center gap-1 transition"
+          >
+            <span>View all</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
 
       {/* Transactions Table / List */}

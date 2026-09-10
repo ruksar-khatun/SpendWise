@@ -20,8 +20,8 @@ import {
   Briefcase,
   FileText,
   FileSpreadsheet,
+  Building2,
 } from 'lucide-react';
-import { ImportStatementModal } from './ImportStatementModal';
 
 interface TransactionsPageProps {
   onEdit: (tx: Transaction) => void;
@@ -155,10 +155,10 @@ export const TransactionsPage: React.FC<TransactionsPageProps> = ({ onEdit, onDe
           <button
             onClick={() => setIsImportModalOpen(true)}
             className="flex items-center gap-2 px-3.5 py-2.5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-teal-700 dark:text-teal-300 text-sm font-bold rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm transition-all active:scale-95"
-            title="Import CSV statement from Google Pay, PhonePe, or Bank"
+            title="Import CSV statement from HDFC, SBI, ICICI, Google Pay, or PhonePe"
           >
-            <FileSpreadsheet className="w-4 h-4 text-teal-600 dark:text-teal-400" />
-            <span>Import Statement</span>
+            <Building2 className="w-4 h-4 text-teal-600 dark:text-teal-400" />
+            <span>Import Bank Statement</span>
           </button>
 
           <button
@@ -388,9 +388,6 @@ export const TransactionsPage: React.FC<TransactionsPageProps> = ({ onEdit, onDe
           </div>
         )}
       </div>
-
-      {/* Google Pay & UPI Statement Import Modal */}
-      <ImportStatementModal />
     </div>
   );
 };

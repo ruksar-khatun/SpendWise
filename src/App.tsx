@@ -18,6 +18,7 @@ import { DeleteConfirmModal } from './components/modals/DeleteConfirmModal';
 import { SavingsGoalModal } from './components/modals/SavingsGoalModal';
 import { AddMoneyModal } from './components/modals/AddMoneyModal';
 import { BudgetModal } from './components/modals/BudgetModal';
+import { ImportStatementModal } from './components/transactions/ImportStatementModal';
 import { Transaction, SavingsGoal } from './types';
 
 const MainAppContent: React.FC = () => {
@@ -181,6 +182,9 @@ const MainAppContent: React.FC = () => {
         defaultCategory={budgetCategoryToEdit}
         defaultAmount={budgetAmountToEdit}
       />
+
+      {/* Bank & UPI Statement Import Modal */}
+      <ImportStatementModal />
 
       {/* Floating Toasts */}
       <ToastContainer />
