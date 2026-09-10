@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useFinance } from '../../context/FinanceContext';
 import { Search, Calendar, Bell, Moon, Sun, ChevronDown, CheckCheck, Sparkles, AlertCircle } from 'lucide-react';
+import { ApiStatusBadge } from '../common/ApiStatusBadge';
 
 interface HeaderProps {
   onOpenMobileMenu?: () => void;
@@ -84,8 +85,11 @@ export const Header: React.FC<HeaderProps> = ({ onOpenMobileMenu }) => {
         </div>
       </div>
 
-      {/* Right Controls: Month Selector, Notification Bell, Dark Mode Toggle */}
-      <div className="flex items-center gap-3">
+      {/* Right Controls: API Status, Month Selector, Notification Bell, Dark Mode Toggle */}
+      <div className="flex items-center gap-2 sm:gap-3">
+        {/* Backend API Connection Indicator */}
+        <ApiStatusBadge />
+
         {/* Month Selector Dropdown */}
         <div className="relative" ref={monthRef}>
           <button

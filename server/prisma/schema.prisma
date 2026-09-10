@@ -1,0 +1,75 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String        @id @default(uuid())
+  email        String        @unique
+  passwordHash String
+  name         String
+  currency     String        @default("₹")
+  theme        String        @default("light")
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  transactions Transaction[]
+  budgets      Budget[]
+  goals        SavingsGoal[]
+  settings     UserSettings?
+}
+
+model UserSettings {
+  id               String   @id @default(uuid())
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  budgetAlerts     Boolean  @default(true)
+  paymentReminders Boolean  @default(true)
+  weeklySummary    Boolean  @default(true)
+}
+
+model Transaction {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type        String   // "income" | "expense"
+  description String
+  category    String
+  amount      Float
+  date        String   // YYYY-MM-DD
+  notes       String?
+  merchant    String?
+  createdAt   DateTime @default(now())
+
+  @@index([userId, date])
+}
+
+model Budget {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category  String
+  amount    Float
+  month     String   // e.g. "2026-09"
+  createdAt DateTime @default(now())
+
+  @@unique([userId, category, month])
+}
+
+model SavingsGoal {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name          String
+  currentAmount Float    @default(0)
+  targetAmount  Float
+  targetDate    String   // e.g. "2026-12-15"
+  category      String
+  icon          String?
+  color         String?
+  createdAt     DateTime @default(now())
+}

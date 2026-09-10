@@ -11,6 +11,7 @@ import {
   SmartInsight,
 } from '../types';
 import { storage } from '../utils/storage';
+import { api, AuthUser } from '../services/api';
 import {
   calculateFinancialSummary,
   calculateHealthScore,
@@ -39,6 +40,16 @@ interface FinanceContextType {
   searchQuery: string;
   toasts: ToastItem[];
 
+  // Full-Stack API Status & Auth
+  isOnline: boolean;
+  isAuth: boolean;
+  currentUser: AuthUser | null;
+  checkApiConnection: () => Promise<boolean>;
+  loginAsDemo: () => Promise<void>;
+  loginWithCredentials: (email: string, pass: string) => Promise<void>;
+  registerUser: (name: string, email: string, pass: string) => Promise<void>;
+  logoutUser: () => void;
+
   // Navigation & Page State
   setActivePage: (page: ActiveNavPage) => void;
   setSelectedMonth: (month: string) => void;
@@ -48,22 +59,22 @@ interface FinanceContextType {
   removeToast: (id: string) => void;
 
   // Transaction CRUD
-  addTransaction: (tx: Omit<Transaction, 'id'>) => void;
-  editTransaction: (id: string, tx: Partial<Transaction>) => void;
-  deleteTransaction: (id: string) => void;
+  addTransaction: (tx: Omit<Transaction, 'id'>) => Promise<void>;
+  editTransaction: (id: string, tx: Partial<Transaction>) => Promise<void>;
+  deleteTransaction: (id: string) => Promise<void>;
 
   // Budget CRUD
-  setBudget: (category: string, amount: number, month?: string) => void;
-  deleteBudget: (id: string) => void;
+  setBudget: (category: string, amount: number, month?: string) => Promise<void>;
+  deleteBudget: (id: string) => Promise<void>;
 
   // Savings Goal CRUD
-  addGoal: (goal: Omit<SavingsGoal, 'id'>) => void;
-  editGoal: (id: string, goal: Partial<SavingsGoal>) => void;
-  deleteGoal: (id: string) => void;
-  addMoneyToGoal: (id: string, amount: number) => void;
+  addGoal: (goal: Omit<SavingsGoal, 'id'>) => Promise<void>;
+  editGoal: (id: string, goal: Partial<SavingsGoal>) => Promise<void>;
+  deleteGoal: (id: string) => Promise<void>;
+  addMoneyToGoal: (id: string, amount: number) => Promise<void>;
 
   // User Settings & Data
-  updateSettings: (newSettings: Partial<UserSettings>) => void;
+  updateSettings: (newSettings: Partial<UserSettings>) => Promise<void>;
   resetToDefaults: () => void;
   clearAllData: () => void;
   exportDataJSON: () => void;
@@ -99,6 +110,11 @@ export const FinanceProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [toasts, setToasts] = useState<ToastItem[]>([]);
 
+  // API & Auth State
+  const [isOnline, setIsOnline] = useState<boolean>(false);
+  const [isAuth, setIsAuth] = useState<boolean>(false);
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
+
   // Modals state
   const [isAddTransactionOpen, setIsAddTransactionOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
@@ -119,6 +135,11 @@ export const FinanceProvider: React.FC<{ children: ReactNode }> = ({ children })
   // Sync theme with html class & storage
   useEffect(() => {
     storage.setTheme(theme);
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
   }, [theme]);
 
   const toggleTheme = () => {
@@ -141,35 +162,171 @@ export const FinanceProvider: React.FC<{ children: ReactNode }> = ({ children })
     setToasts(prev => prev.filter(t => t.id !== id));
   };
 
+  // Sync backend data to state
+  const loadDataFromApi = async () => {
+    try {
+      const [apiTxs, apiBudgets, apiGoals] = await Promise.all([
+        api.getTransactions(),
+        api.getBudgets(),
+        api.getGoals(),
+      ]);
+
+      if (apiTxs && apiTxs.length > 0) {
+        setTransactions(apiTxs);
+        storage.setTransactions(apiTxs);
+      }
+      if (apiBudgets && apiBudgets.length > 0) {
+        setBudgets(apiBudgets);
+        storage.setBudgets(apiBudgets);
+      }
+      if (apiGoals && apiGoals.length > 0) {
+        setGoals(apiGoals);
+        storage.setSavingsGoals(apiGoals);
+      }
+    } catch (err) {
+      console.warn('Could not sync with backend data:', err);
+    }
+  };
+
+  // Check API health and authenticate
+  const checkApiConnection = async (): Promise<boolean> => {
+    const healthy = await api.checkHealth();
+    setIsOnline(healthy);
+
+    if (healthy) {
+      // Check existing token
+      let user = await api.getMe();
+      if (!user) {
+        // Auto-login demo account for seamless showcase
+        try {
+          const authRes = await api.login('ruks@example.com', 'password123');
+          user = authRes.user;
+        } catch {
+          // Demo login fallback
+        }
+      }
+
+      if (user) {
+        setIsAuth(true);
+        setCurrentUser(user);
+        await loadDataFromApi();
+      }
+    } else {
+      setIsAuth(false);
+      setCurrentUser(null);
+    }
+
+    return healthy;
+  };
+
+  // Initial connect on mount
+  useEffect(() => {
+    checkApiConnection();
+  }, []);
+
+  // Auth Actions
+  const loginAsDemo = async () => {
+    try {
+      const res = await api.login('ruks@example.com', 'password123');
+      setIsAuth(true);
+      setCurrentUser(res.user);
+      setIsOnline(true);
+      showToast('Connected to Backend', 'Logged in as Demo User (ruks@example.com)', 'success');
+      await loadDataFromApi();
+    } catch (err: any) {
+      showToast('Connection failed', err.message || 'Make sure backend server is running', 'error');
+    }
+  };
+
+  const loginWithCredentials = async (email: string, pass: string) => {
+    try {
+      const res = await api.login(email, pass);
+      setIsAuth(true);
+      setCurrentUser(res.user);
+      setIsOnline(true);
+      showToast('Login successful', `Welcome back, ${res.user.name}!`, 'success');
+      await loadDataFromApi();
+    } catch (err: any) {
+      showToast('Login failed', err.message, 'error');
+      throw err;
+    }
+  };
+
+  const registerUser = async (name: string, email: string, pass: string) => {
+    try {
+      const res = await api.register(name, email, pass);
+      setIsAuth(true);
+      setCurrentUser(res.user);
+      setIsOnline(true);
+      showToast('Account created', `Welcome to SpendWise, ${name}!`, 'success');
+      await loadDataFromApi();
+    } catch (err: any) {
+      showToast('Registration failed', err.message, 'error');
+      throw err;
+    }
+  };
+
+  const logoutUser = () => {
+    api.removeToken();
+    setIsAuth(false);
+    setCurrentUser(null);
+    showToast('Logged out', 'Switched to offline local storage mode', 'info');
+  };
+
   // Transaction Actions
-  const addTransaction = (tx: Omit<Transaction, 'id'>) => {
-    const newTx: Transaction = {
-      ...tx,
-      id: `tx-${Date.now()}`,
-    };
+  const addTransaction = async (tx: Omit<Transaction, 'id'>) => {
+    const tempId = `tx-${Date.now()}`;
+    const newTx: Transaction = { ...tx, id: tempId };
+    
+    // Optimistic UI update
     const updated = [newTx, ...transactions];
     setTransactions(updated);
     storage.setTransactions(updated);
     showToast('Transaction added', `Successfully logged ₹${tx.amount.toLocaleString()} for ${tx.description}`);
+
+    if (isOnline && isAuth) {
+      try {
+        const savedTx = await api.createTransaction(tx);
+        setTransactions(prev => prev.map(t => (t.id === tempId ? savedTx : t)));
+      } catch (err) {
+        console.error('Failed to sync transaction to backend:', err);
+      }
+    }
   };
 
-  const editTransaction = (id: string, updatedFields: Partial<Transaction>) => {
+  const editTransaction = async (id: string, updatedFields: Partial<Transaction>) => {
     const updated = transactions.map(t => (t.id === id ? { ...t, ...updatedFields } : t));
     setTransactions(updated);
     storage.setTransactions(updated);
     showToast('Transaction updated', 'Your changes have been saved successfully');
+
+    if (isOnline && isAuth) {
+      try {
+        await api.updateTransaction(id, updatedFields);
+      } catch (err) {
+        console.error('Failed to sync transaction update to backend:', err);
+      }
+    }
   };
 
-  const deleteTransaction = (id: string) => {
+  const deleteTransaction = async (id: string) => {
     const target = transactions.find(t => t.id === id);
     const updated = transactions.filter(t => t.id !== id);
     setTransactions(updated);
     storage.setTransactions(updated);
     showToast('Transaction deleted', target ? `Removed ${target.description}` : undefined, 'info');
+
+    if (isOnline && isAuth) {
+      try {
+        await api.deleteTransaction(id);
+      } catch (err) {
+        console.error('Failed to sync transaction deletion to backend:', err);
+      }
+    }
   };
 
   // Budget Actions
-  const setBudget = (category: string, amount: number, month = selectedMonth) => {
+  const setBudget = async (category: string, amount: number, month = selectedMonth) => {
     const existingIndex = budgets.findIndex(b => b.category === category && b.month === month);
     let updated: Budget[];
     if (existingIndex >= 0) {
@@ -181,42 +338,81 @@ export const FinanceProvider: React.FC<{ children: ReactNode }> = ({ children })
     setBudgets(updated);
     storage.setBudgets(updated);
     showToast('Budget saved', `Budget for ${category} set to ₹${amount.toLocaleString()}`);
+
+    if (isOnline && isAuth) {
+      try {
+        await api.upsertBudget({ category, amount, month });
+      } catch (err) {
+        console.error('Failed to sync budget to backend:', err);
+      }
+    }
   };
 
-  const deleteBudget = (id: string) => {
+  const deleteBudget = async (id: string) => {
     const updated = budgets.filter(b => b.id !== id);
     setBudgets(updated);
     storage.setBudgets(updated);
     showToast('Budget removed', undefined, 'info');
+
+    if (isOnline && isAuth) {
+      try {
+        await api.deleteBudget(id);
+      } catch (err) {
+        console.error('Failed to sync budget deletion to backend:', err);
+      }
+    }
   };
 
   // Goal Actions
-  const addGoal = (goal: Omit<SavingsGoal, 'id'>) => {
-    const newGoal: SavingsGoal = {
-      ...goal,
-      id: `goal-${Date.now()}`,
-    };
+  const addGoal = async (goal: Omit<SavingsGoal, 'id'>) => {
+    const tempId = `goal-${Date.now()}`;
+    const newGoal: SavingsGoal = { ...goal, id: tempId };
     const updated = [...goals, newGoal];
     setGoals(updated);
     storage.setSavingsGoals(updated);
     showToast('Goal created', `Started tracking ${goal.name}!`);
+
+    if (isOnline && isAuth) {
+      try {
+        const savedGoal = await api.createGoal(goal);
+        setGoals(prev => prev.map(g => (g.id === tempId ? savedGoal : g)));
+      } catch (err) {
+        console.error('Failed to sync goal to backend:', err);
+      }
+    }
   };
 
-  const editGoal = (id: string, updatedFields: Partial<SavingsGoal>) => {
+  const editGoal = async (id: string, updatedFields: Partial<SavingsGoal>) => {
     const updated = goals.map(g => (g.id === id ? { ...g, ...updatedFields } : g));
     setGoals(updated);
     storage.setSavingsGoals(updated);
     showToast('Goal updated', 'Savings goal updated');
+
+    if (isOnline && isAuth) {
+      try {
+        await api.updateGoal(id, updatedFields);
+      } catch (err) {
+        console.error('Failed to sync goal update to backend:', err);
+      }
+    }
   };
 
-  const deleteGoal = (id: string) => {
+  const deleteGoal = async (id: string) => {
     const updated = goals.filter(g => g.id !== id);
     setGoals(updated);
     storage.setSavingsGoals(updated);
     showToast('Goal removed', undefined, 'info');
+
+    if (isOnline && isAuth) {
+      try {
+        await api.deleteGoal(id);
+      } catch (err) {
+        console.error('Failed to sync goal deletion to backend:', err);
+      }
+    }
   };
 
-  const addMoneyToGoal = (id: string, amount: number) => {
+  const addMoneyToGoal = async (id: string, amount: number) => {
     let completed = false;
     let goalName = '';
     const updated = goals.map(g => {
@@ -249,14 +445,30 @@ export const FinanceProvider: React.FC<{ children: ReactNode }> = ({ children })
     } else {
       showToast('Money added to goal', `Added ₹${amount.toLocaleString()} to ${goalName}`);
     }
+
+    if (isOnline && isAuth) {
+      try {
+        await api.depositToGoal(id, amount);
+      } catch (err) {
+        console.error('Failed to sync deposit to backend:', err);
+      }
+    }
   };
 
   // User Settings Actions
-  const updateSettings = (newFields: Partial<UserSettings>) => {
+  const updateSettings = async (newFields: Partial<UserSettings>) => {
     const updated = { ...settings, ...newFields };
     setSettings(updated);
     storage.setSettings(updated);
     showToast('Preferences saved', 'Your profile and settings were updated');
+
+    if (isOnline && isAuth) {
+      try {
+        await api.updateSettings(newFields);
+      } catch (err) {
+        console.error('Failed to sync settings to backend:', err);
+      }
+    }
   };
 
   const resetToDefaults = () => {
@@ -331,6 +543,15 @@ export const FinanceProvider: React.FC<{ children: ReactNode }> = ({ children })
         activePage,
         searchQuery,
         toasts,
+
+        isOnline,
+        isAuth,
+        currentUser,
+        checkApiConnection,
+        loginAsDemo,
+        loginWithCredentials,
+        registerUser,
+        logoutUser,
 
         setActivePage,
         setSelectedMonth,
