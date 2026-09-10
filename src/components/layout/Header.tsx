@@ -65,18 +65,18 @@ export const Header: React.FC<HeaderProps> = ({ onOpenMobileMenu }) => {
   };
 
   return (
-    <header className="sticky top-0 z-30 flex items-center justify-between px-6 py-4 bg-[#f4f7f6]/90 dark:bg-[#0b1120]/90 backdrop-blur-md border-b border-transparent dark:border-slate-800/60 transition-colors">
+    <header className="sticky top-0 z-30 flex items-center justify-between px-3 sm:px-6 py-2.5 sm:py-4 bg-[#f4f7f6]/90 dark:bg-[#0b1120]/90 backdrop-blur-md border-b border-transparent dark:border-slate-800/60 transition-colors">
       {/* Left: Back Button, Mobile hamburger & Search bar */}
-      <div className="flex items-center gap-2 sm:gap-3 flex-1 max-w-md">
+      <div className="flex items-center gap-1.5 sm:gap-3 flex-1 min-w-0 max-w-md">
         {canGoBack && (
           <button
             onClick={goBack}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700/80 border border-slate-200/90 dark:border-slate-700/90 rounded-full shadow-2xs hover:shadow-xs transition active:scale-95 group flex-shrink-0"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700/80 border border-slate-200/90 dark:border-slate-700/90 rounded-full shadow-2xs hover:shadow-xs transition active:scale-95 group flex-shrink-0 touch-manipulation cursor-pointer"
             title={`Back to ${previousPage ? previousPage.charAt(0).toUpperCase() + previousPage.slice(1) : 'Dashboard'}`}
             aria-label="Back"
           >
             <ArrowLeft className="w-4 h-4 text-slate-500 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-transform group-hover:-translate-x-0.5" />
-            <span className="hidden sm:inline">Back</span>
+            <span className="text-xs font-bold">Back</span>
           </button>
         )}
 

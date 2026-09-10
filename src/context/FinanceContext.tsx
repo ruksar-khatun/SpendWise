@@ -118,23 +118,6 @@ export const FinanceProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [activePage, setActivePageState] = useState<ActiveNavPage>('overview');
   const [navHistory, setNavHistory] = useState<ActiveNavPage[]>(['overview']);
 
-  const setActivePage = (page: ActiveNavPage) => {
-    setActivePageState(page);
-    setNavHistory((prev) => (prev[prev.length - 1] === page ? prev : [...prev, page]));
-  };
-
-  const goBack = () => {
-    setNavHistory((prev) => {
-      if (prev.length > 1) {
-        const next = prev.slice(0, prev.length - 1);
-        setActivePageState(next[next.length - 1]);
-        return next;
-      }
-      setActivePageState('overview');
-      return ['overview'];
-    });
-  };
-
   const canGoBack = activePage !== 'overview' || navHistory.length > 1;
 
   const previousPage = useMemo<ActiveNavPage | null>(() => {
@@ -143,6 +126,81 @@ export const FinanceProvider: React.FC<{ children: ReactNode }> = ({ children })
     }
     return activePage !== 'overview' ? 'overview' : null;
   }, [navHistory, activePage]);
+
+  // Sync tab navigation with mobile phone hardware / browser back gestures (popstate)
+  useEffect(() => {
+    const validPages: ActiveNavPage[] = [
+      'overview',
+      'transactions',
+      'budgets',
+      'analytics',
+      'savings',
+      'settings',
+      'profile',
+      'help',
+    ];
+
+    // Initial page check from URL hash if present
+    const initialHash = window.location.hash.replace('#', '') as ActiveNavPage;
+    if (initialHash && validPages.includes(initialHash) && initialHash !== 'overview') {
+      setActivePageState(initialHash);
+      setNavHistory(['overview', initialHash]);
+    }
+
+    const handlePopState = (event: PopStateEvent) => {
+      const pageFromState = event.state?.page as ActiveNavPage | undefined;
+      const pageFromHash = window.location.hash.replace('#', '') as ActiveNavPage;
+      const targetPage = (pageFromState || (validPages.includes(pageFromHash) ? pageFromHash : 'overview')) as ActiveNavPage;
+
+      setActivePageState(targetPage);
+      setNavHistory((prev) => {
+        if (prev.length > 1 && prev[prev.length - 2] === targetPage) {
+          return prev.slice(0, prev.length - 1);
+        }
+        return prev.includes(targetPage) ? prev : [...prev, targetPage];
+      });
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const setActivePage = (page: ActiveNavPage) => {
+    if (page === activePage) return;
+    setActivePageState(page);
+    setNavHistory((prev) => (prev[prev.length - 1] === page ? prev : [...prev, page]));
+    try {
+      const hash = page === 'overview' ? '' : `#${page}`;
+      const url = window.location.pathname + window.location.search + hash;
+      window.history.pushState({ page }, '', url);
+    } catch {
+      // Ignore if pushState is restricted
+    }
+  };
+
+  const goBack = () => {
+    if (window.history.state?.page && canGoBack) {
+      window.history.back();
+    } else {
+      setNavHistory((prev) => {
+        if (prev.length > 1) {
+          const next = prev.slice(0, prev.length - 1);
+          const target = next[next.length - 1];
+          setActivePageState(target);
+          try {
+            const hash = target === 'overview' ? '' : `#${target}`;
+            window.history.replaceState({ page: target }, '', window.location.pathname + window.location.search + hash);
+          } catch {}
+          return next;
+        }
+        setActivePageState('overview');
+        try {
+          window.history.replaceState({ page: 'overview' }, '', window.location.pathname + window.location.search);
+        } catch {}
+        return ['overview'];
+      });
+    }
+  };
 
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [toasts, setToasts] = useState<ToastItem[]>([]);
