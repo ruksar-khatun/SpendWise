@@ -62,6 +62,7 @@ interface FinanceContextType {
   addTransaction: (tx: Omit<Transaction, 'id'>) => Promise<void>;
   editTransaction: (id: string, tx: Partial<Transaction>) => Promise<void>;
   deleteTransaction: (id: string) => Promise<void>;
+  bulkImportTransactions: (txs: Omit<Transaction, 'id'>[]) => Promise<number>;
 
   // Budget CRUD
   setBudget: (category: string, amount: number, month?: string) => Promise<void>;
@@ -95,6 +96,8 @@ interface FinanceContextType {
   setIsAddGoalOpen: (open: boolean) => void;
   isSetBudgetOpen: boolean;
   setIsSetBudgetOpen: (open: boolean) => void;
+  isImportModalOpen: boolean;
+  setIsImportModalOpen: (open: boolean) => void;
 }
 
 const FinanceContext = createContext<FinanceContextType | undefined>(undefined);
@@ -120,6 +123,7 @@ export const FinanceProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [isAddGoalOpen, setIsAddGoalOpen] = useState(false);
   const [isSetBudgetOpen, setIsSetBudgetOpen] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
   // Month label helper
   const selectedMonthLabel = useMemo(() => {
@@ -323,6 +327,42 @@ export const FinanceProvider: React.FC<{ children: ReactNode }> = ({ children })
         console.error('Failed to sync transaction deletion to backend:', err);
       }
     }
+  };
+
+  const bulkImportTransactions = async (txs: Omit<Transaction, 'id'>[]): Promise<number> => {
+    if (!txs || txs.length === 0) return 0;
+
+    const newTxs: Transaction[] = txs.map((t, idx) => ({
+      ...t,
+      id: `tx-import-${Date.now()}-${idx}`,
+    }));
+
+    // Optimistically update local state & localStorage
+    const updated = [...newTxs, ...transactions];
+    setTransactions(updated);
+    storage.setTransactions(updated);
+
+    if (isOnline && isAuth) {
+      try {
+        await api.bulkCreateTransactions(txs);
+        // Refresh with server transactions
+        const freshTxs = await api.getTransactions();
+        if (freshTxs && freshTxs.length > 0) {
+          setTransactions(freshTxs);
+          storage.setTransactions(freshTxs);
+        }
+      } catch (err) {
+        console.error('Failed to sync bulk transactions to backend:', err);
+      }
+    }
+
+    showToast(
+      'Statement Imported! 🎉',
+      `Successfully added ${txs.length} transactions to your dashboard`,
+      'success'
+    );
+
+    return txs.length;
   };
 
   // Budget Actions
@@ -563,6 +603,7 @@ export const FinanceProvider: React.FC<{ children: ReactNode }> = ({ children })
         addTransaction,
         editTransaction,
         deleteTransaction,
+        bulkImportTransactions,
 
         setBudget,
         deleteBudget,
@@ -591,6 +632,8 @@ export const FinanceProvider: React.FC<{ children: ReactNode }> = ({ children })
         setIsAddGoalOpen,
         isSetBudgetOpen,
         setIsSetBudgetOpen,
+        isImportModalOpen,
+        setIsImportModalOpen,
       }}
     >
       {children}

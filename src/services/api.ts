@@ -126,6 +126,17 @@ export const api = {
     return data.transaction;
   },
 
+  bulkCreateTransactions: async (txs: Omit<Transaction, 'id'>[]): Promise<{ count: number }> => {
+    const res = await fetch(`${API_BASE}/transactions/bulk`, {
+      method: 'POST',
+      headers: api.getHeaders(),
+      body: JSON.stringify({ transactions: txs }),
+    });
+
+    if (!res.ok) throw new Error('Failed to bulk import transactions');
+    return res.json();
+  },
+
   updateTransaction: async (id: string, tx: Partial<Transaction>): Promise<Transaction> => {
     const res = await fetch(`${API_BASE}/transactions/${id}`, {
       method: 'PUT',

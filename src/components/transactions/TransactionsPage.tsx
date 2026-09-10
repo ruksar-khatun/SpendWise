@@ -19,7 +19,9 @@ import {
   Zap,
   Briefcase,
   FileText,
+  FileSpreadsheet,
 } from 'lucide-react';
+import { ImportStatementModal } from './ImportStatementModal';
 
 interface TransactionsPageProps {
   onEdit: (tx: Transaction) => void;
@@ -28,7 +30,7 @@ interface TransactionsPageProps {
 }
 
 export const TransactionsPage: React.FC<TransactionsPageProps> = ({ onEdit, onDelete, onAdd }) => {
-  const { transactions, searchQuery, setSearchQuery } = useFinance();
+  const { transactions, searchQuery, setSearchQuery, setIsImportModalOpen } = useFinance();
 
   const [typeFilter, setTypeFilter] = useState<'all' | 'income' | 'expense'>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
@@ -149,13 +151,24 @@ export const TransactionsPage: React.FC<TransactionsPageProps> = ({ onEdit, onDe
           </p>
         </div>
 
-        <button
-          onClick={onAdd}
-          className="flex items-center gap-2 px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white text-sm font-bold rounded-2xl shadow-lg shadow-teal-600/20 transition-all self-start sm:self-auto active:scale-95"
-        >
-          <Plus className="w-4 h-4 stroke-[2.5]" />
-          <span>+ Add Transaction</span>
-        </button>
+        <div className="flex items-center gap-2.5 self-start sm:self-auto">
+          <button
+            onClick={() => setIsImportModalOpen(true)}
+            className="flex items-center gap-2 px-3.5 py-2.5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-teal-700 dark:text-teal-300 text-sm font-bold rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm transition-all active:scale-95"
+            title="Import CSV statement from Google Pay, PhonePe, or Bank"
+          >
+            <FileSpreadsheet className="w-4 h-4 text-teal-600 dark:text-teal-400" />
+            <span>Import Statement</span>
+          </button>
+
+          <button
+            onClick={onAdd}
+            className="flex items-center gap-2 px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white text-sm font-bold rounded-2xl shadow-lg shadow-teal-600/20 transition-all active:scale-95"
+          >
+            <Plus className="w-4 h-4 stroke-[2.5]" />
+            <span>+ Add Transaction</span>
+          </button>
+        </div>
       </div>
 
       {/* Aggregate Stats Pill Bar */}
@@ -375,6 +388,9 @@ export const TransactionsPage: React.FC<TransactionsPageProps> = ({ onEdit, onDe
           </div>
         )}
       </div>
+
+      {/* Google Pay & UPI Statement Import Modal */}
+      <ImportStatementModal />
     </div>
   );
 };

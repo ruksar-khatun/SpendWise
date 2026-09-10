@@ -100,3 +100,26 @@ export const deleteTransaction = async (req: AuthRequest, res: Response): Promis
 
   res.json({ message: 'Transaction deleted successfully', id });
 };
+
+export const bulkCreateTransactions = async (req: AuthRequest, res: Response): Promise<void> => {
+  const userId = req.user!.id;
+  const bulkSchema = z.object({
+    transactions: z.array(transactionSchema).min(1, 'At least one transaction required'),
+  });
+
+  const { transactions } = bulkSchema.parse(req.body);
+
+  const dataToInsert = transactions.map(t => ({
+    ...t,
+    userId,
+  }));
+
+  const result = await prisma.transaction.createMany({
+    data: dataToInsert,
+  });
+
+  res.status(201).json({
+    message: `Successfully imported ${result.count} transactions`,
+    count: result.count,
+  });
+};
