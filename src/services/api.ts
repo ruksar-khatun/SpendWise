@@ -7,6 +7,7 @@ export interface AuthUser {
   id: string;
   name: string;
   email: string;
+  avatarUrl?: string;
   currency: string;
   theme: string;
 }
@@ -79,6 +80,28 @@ export const api = {
     if (!res.ok) {
       const err = await res.json().catch(() => ({ error: 'Registration failed' }));
       throw new Error(err.error || 'Registration failed');
+    }
+
+    const data = await res.json();
+    api.setToken(data.token);
+    return data;
+  },
+
+  googleLogin: async (profile: {
+    email: string;
+    name: string;
+    avatarUrl?: string;
+    googleId?: string;
+  }): Promise<{ token: string; user: AuthUser }> => {
+    const res = await fetch(`${API_BASE}/auth/google`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(profile),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'Google login failed' }));
+      throw new Error(err.error || 'Google login failed');
     }
 
     const data = await res.json();

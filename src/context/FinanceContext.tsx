@@ -48,7 +48,10 @@ interface FinanceContextType {
   loginAsDemo: () => Promise<void>;
   loginWithCredentials: (email: string, pass: string) => Promise<void>;
   registerUser: (name: string, email: string, pass: string) => Promise<void>;
+  signInWithGoogle: (profile: { email: string; name: string; avatarUrl?: string; googleId?: string }) => Promise<void>;
   logoutUser: () => void;
+  isGoogleModalOpen: boolean;
+  setIsGoogleModalOpen: (open: boolean) => void;
 
   // Navigation & Page State
   setActivePage: (page: ActiveNavPage) => void;
@@ -124,6 +127,7 @@ export const FinanceProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [isAddGoalOpen, setIsAddGoalOpen] = useState(false);
   const [isSetBudgetOpen, setIsSetBudgetOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [isGoogleModalOpen, setIsGoogleModalOpen] = useState(false);
 
   // Month label helper
   const selectedMonthLabel = useMemo(() => {
@@ -266,6 +270,30 @@ export const FinanceProvider: React.FC<{ children: ReactNode }> = ({ children })
       await loadDataFromApi();
     } catch (err: any) {
       showToast('Registration failed', err.message, 'error');
+      throw err;
+    }
+  };
+
+  const signInWithGoogle = async (profile: { email: string; name: string; avatarUrl?: string; googleId?: string }) => {
+    try {
+      const res = await api.googleLogin(profile);
+      setIsAuth(true);
+      setCurrentUser(res.user);
+      setIsOnline(true);
+
+      const updatedSettings: UserSettings = {
+        ...settings,
+        name: res.user.name,
+        email: res.user.email,
+        avatarUrl: res.user.avatarUrl || settings.avatarUrl,
+      };
+      setSettings(updatedSettings);
+      storage.setSettings(updatedSettings);
+
+      showToast('Google Account Connected', `Signed in as ${res.user.name}`, 'success');
+      await loadDataFromApi();
+    } catch (err: any) {
+      showToast('Google Sign-In Failed', err.message || 'Could not authenticate with Google', 'error');
       throw err;
     }
   };
@@ -591,6 +619,7 @@ export const FinanceProvider: React.FC<{ children: ReactNode }> = ({ children })
         loginAsDemo,
         loginWithCredentials,
         registerUser,
+        signInWithGoogle,
         logoutUser,
 
         setActivePage,
@@ -634,6 +663,8 @@ export const FinanceProvider: React.FC<{ children: ReactNode }> = ({ children })
         setIsSetBudgetOpen,
         isImportModalOpen,
         setIsImportModalOpen,
+        isGoogleModalOpen,
+        setIsGoogleModalOpen,
       }}
     >
       {children}

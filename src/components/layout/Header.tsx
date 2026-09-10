@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useFinance } from '../../context/FinanceContext';
 import { Search, Calendar, Bell, Moon, Sun, ChevronDown, CheckCheck, Sparkles, AlertCircle } from 'lucide-react';
-import { ApiStatusBadge } from '../common/ApiStatusBadge';
+import { GoogleIcon } from '../auth/GoogleAuthModal';
 
 interface HeaderProps {
   onOpenMobileMenu?: () => void;
@@ -18,6 +18,9 @@ export const Header: React.FC<HeaderProps> = ({ onOpenMobileMenu }) => {
     setSearchQuery,
     setActivePage,
     insights,
+    currentUser,
+    isAuth,
+    setIsGoogleModalOpen,
   } = useFinance();
 
   const [isMonthOpen, setIsMonthOpen] = useState(false);
@@ -87,8 +90,41 @@ export const Header: React.FC<HeaderProps> = ({ onOpenMobileMenu }) => {
 
       {/* Right Controls: API Status, Month Selector, Notification Bell, Dark Mode Toggle */}
       <div className="flex items-center gap-2 sm:gap-3">
-        {/* Backend API Connection Indicator */}
-        <ApiStatusBadge />
+        {/* Google Authentication Trigger / Account Badge */}
+        {isAuth && currentUser ? (
+          <button
+            onClick={() => setIsGoogleModalOpen(true)}
+            className="flex items-center gap-2 pl-1.5 pr-3 py-1 bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 rounded-full shadow-xs hover:border-blue-400 dark:hover:border-blue-500 transition group"
+            title={`Signed in as ${currentUser.email} (Click to manage account)`}
+          >
+            {currentUser.avatarUrl ? (
+              <img
+                src={currentUser.avatarUrl}
+                alt={currentUser.name}
+                className="w-6 h-6 rounded-full object-cover border border-slate-200 dark:border-slate-700"
+              />
+            ) : (
+              <div className="w-6 h-6 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-[10px]">
+                {currentUser.name.charAt(0)}
+              </div>
+            )}
+            <span className="text-xs font-semibold text-slate-800 dark:text-slate-100 max-w-[110px] truncate hidden sm:inline">
+              {currentUser.name}
+            </span>
+            <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-xs ring-1 ring-white dark:ring-slate-800" />
+          </button>
+        ) : (
+          <button
+            onClick={() => setIsGoogleModalOpen(true)}
+            className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700/90 rounded-full shadow-xs hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:border-slate-300 dark:hover:border-slate-600 transition group"
+            title="Sign in with Google to save data to database"
+          >
+            <GoogleIcon className="w-4 h-4 flex-shrink-0" />
+            <span className="text-xs font-semibold text-slate-700 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition">
+              <span className="hidden sm:inline">Sign in with </span>Google
+            </span>
+          </button>
+        )}
 
         {/* Month Selector Dropdown */}
         <div className="relative" ref={monthRef}>

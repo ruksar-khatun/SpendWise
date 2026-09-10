@@ -46,10 +46,12 @@ Designed with a clean, pastel fintech aesthetic, SpendWise empowers users to tra
 - **Relational Data Modeling**:
   - Normalized database schema with foreign key cascades (`User` ➔ `Transactions`, `Budgets`, `SavingsGoals`).
   - Composite indexes and unique constraints on `[userId, date]` and `[userId, category, month]`.
+- **Google Account Authentication & Cloud Database Sync**:
+  - Sign in or sign up via Google account to securely persist all transactions, category budgets, and savings milestones directly to your SQLite database.
+  - Generates signed JWT session tokens and syncs client state with the backend automatically.
 - **Hybrid Offline Resilience**:
   - Seamless frontend API client (`src/services/api.ts`) that persists to the Express/SQL database when online.
   - Automatically falls back to browser `localStorage` when offline, guaranteeing 100% uptime with zero blank screens.
-  - Live header indicator badge (`🟢 API Connected` / `🟠 Local Storage Mode`).
 - **Server-Side Algorithmic Scoring**:
   - Dynamic 100-point Financial Health score computed server-side across budget adherence, savings rate, consistency, and goal velocity.
 

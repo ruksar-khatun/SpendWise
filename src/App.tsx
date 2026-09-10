@@ -19,6 +19,7 @@ import { SavingsGoalModal } from './components/modals/SavingsGoalModal';
 import { AddMoneyModal } from './components/modals/AddMoneyModal';
 import { BudgetModal } from './components/modals/BudgetModal';
 import { ImportStatementModal } from './components/transactions/ImportStatementModal';
+import { GoogleAuthModal } from './components/auth/GoogleAuthModal';
 import { Transaction, SavingsGoal } from './types';
 
 const MainAppContent: React.FC = () => {
@@ -185,6 +186,9 @@ const MainAppContent: React.FC = () => {
 
       {/* Bank & UPI Statement Import Modal */}
       <ImportStatementModal />
+
+      {/* Google Authentication Modal */}
+      <GoogleAuthModal />
 
       {/* Floating Toasts */}
       <ToastContainer />

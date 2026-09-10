@@ -75,8 +75,8 @@ export const login = async (req: AuthRequest, res: Response): Promise<void> => {
     include: { settings: true },
   });
 
-  if (!user) {
-    res.status(401).json({ error: 'Invalid email or password' });
+  if (!user || !user.passwordHash) {
+    res.status(401).json({ error: 'Invalid email or password. If you signed up with Google, please use Google Sign In.' });
     return;
   }
 
@@ -140,6 +140,7 @@ export const updateProfile = async (req: AuthRequest, res: Response): Promise<vo
       id: true,
       name: true,
       email: true,
+      avatarUrl: true,
       currency: true,
       theme: true,
       settings: true,
@@ -147,4 +148,84 @@ export const updateProfile = async (req: AuthRequest, res: Response): Promise<vo
   });
 
   res.json({ message: 'Profile updated successfully', user: updated });
+};
+
+const googleAuthSchema = z.object({
+  email: z.string().email(),
+  name: z.string().min(1),
+  avatarUrl: z.string().optional(),
+  googleId: z.string().optional(),
+});
+
+export const googleAuth = async (req: AuthRequest, res: Response): Promise<void> => {
+  const { email, name, avatarUrl, googleId } = googleAuthSchema.parse(req.body);
+  const normalizedEmail = email.toLowerCase().trim();
+
+  let user = await prisma.user.findFirst({
+    where: {
+      OR: [
+        { email: normalizedEmail },
+        ...(googleId ? [{ googleId }] : []),
+      ],
+    },
+    include: { settings: true },
+  });
+
+  if (!user) {
+    user = await prisma.user.create({
+      data: {
+        email: normalizedEmail,
+        name,
+        avatarUrl: avatarUrl || undefined,
+        googleId: googleId || `google-${Date.now()}`,
+        settings: {
+          create: {
+            budgetAlerts: true,
+            paymentReminders: true,
+            weeklySummary: true,
+          },
+        },
+        budgets: {
+          createMany: {
+            data: [
+              { category: 'Food', amount: 8000, month: '2026-09' },
+              { category: 'Shopping', amount: 5000, month: '2026-09' },
+              { category: 'Transport', amount: 4000, month: '2026-09' },
+              { category: 'Bills', amount: 6000, month: '2026-09' },
+              { category: 'Entertainment', amount: 3000, month: '2026-09' },
+              { category: 'Health', amount: 3000, month: '2026-09' },
+              { category: 'Other', amount: 6000, month: '2026-09' },
+            ],
+          },
+        },
+      },
+      include: { settings: true },
+    });
+  } else {
+    user = await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        name: name || user.name,
+        avatarUrl: avatarUrl || user.avatarUrl,
+        googleId: googleId || user.googleId,
+      },
+      include: { settings: true },
+    });
+  }
+
+  const token = generateToken(user.id);
+
+  res.json({
+    message: 'Google authentication successful',
+    token,
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      avatarUrl: user.avatarUrl,
+      currency: user.currency,
+      theme: user.theme,
+      settings: user.settings,
+    },
+  });
 };
